@@ -14,7 +14,7 @@ class Program
         string[] lines = File.ReadAllLines(filePath);
 
         int accumulator = 0;
-        int index = 0;
+        List<int> cards = new();
 
         // Print each line
         foreach (string line in lines)
@@ -23,18 +23,27 @@ class Program
             var winning = Regex.Matches(lineParts[1], @"\d+").Select(m => m.Value);
             var have = Regex.Matches(lineParts[2], @"\d+").Select(m => m.Value);
             var winningCards = winning.Intersect(have).Count();
-            double points = 0.0;
-            if(winningCards>0)
-            {
-                points = Math.Pow(2, winningCards - 1);
-            }
-            
-            Console.WriteLine($"{line} - {winningCards} - {points}");
-            accumulator += (int)points;
+
+            Console.WriteLine($"{line} - {winningCards}");
+            cards.Add(winningCards);
         }
 
+        var counts = cards.Select(c => 1).ToList();
 
-        Console.WriteLine($"Total value = {accumulator}");
+        for (int i = 0; i < cards.Count; i++)
+        {
+            var card = cards[i];
+            var count = counts[i];
+            for (int j = 0; j < card; j++)
+            {
+                counts[i + j + 1] += count;
+            }
+        }
+
+        Console.WriteLine($"{string.Join(" ", cards)}");
+        Console.WriteLine($"{string.Join(" ", counts)}");
+
+        Console.WriteLine($"Total value = {counts.Sum()}");
     }
 
 
