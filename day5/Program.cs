@@ -15,22 +15,20 @@ class Program
         // Read all lines from the file and store them in an array
         string[] lines = File.ReadAllLines(filePath);
 
-        var seeds = ParseNumbers(lines[0]);
-        Console.WriteLine($"{string.Join(" ", seeds)}");
+        var seedRanges = ParseSeeds(lines[0]);
         Dictionary<string, List<Map>> maps = new();
         // Print each line
-        lines[0]=String.Empty;
+        lines[0] = String.Empty;
         var currentMap = String.Empty;
         long aggregate = long.MaxValue;
         foreach (string line in lines)
         {
-            if(line.Contains("map"))
+            if (line.Contains("map"))
             {
-                currentMap = line.Remove(line.Length-5);
-                maps.Add(currentMap,new List<Map>());
-                Console.WriteLine(currentMap);
+                currentMap = line.Remove(line.Length - 5);
+                maps.Add(currentMap, new List<Map>());
             }
-            else if(string.IsNullOrEmpty(line))
+            else if (string.IsNullOrEmpty(line))
             {
                 continue;
             }
@@ -40,28 +38,40 @@ class Program
             }
         }
 
-        foreach (var seed in seeds)
+        foreach (var seedRange in seedRanges)
         {
-            Console.WriteLine($"Seed: {seed}");
-            var input = seed;
-            foreach (var map in maps)
+            Console.WriteLine($"Seed: {seedRange.Start}");
+            for (long i = seedRange.Start; i <= seedRange.End; i++)
             {
-                input = ExecuteMapping(map.Value,input);
+                
+                var input = i;
+                foreach (var map in maps)
+                {
+                    input = ExecuteMapping(map.Value, input);
 
+                }
+                aggregate = Math.Min(aggregate, input);
+                //Console.WriteLine($"Final: {input}");
             }
-            aggregate = Math.Min(aggregate, input);
-            Console.WriteLine($"Final: {input}");
             Console.WriteLine($"Min: {aggregate}");
+
         }
+    }
+
+    private static IEnumerable<Range> ParseSeeds(string line)
+    {
+        var seeds = ParseNumbers(line);
+        return seeds.Chunk(2).Select(s => new Range(s[0], s[1]));
+        //return seeds.Select(s => new Range(s, 1));
     }
 
     private static long ExecuteMapping(List<Map> maps, long input)
     {
         foreach (var map in maps)
         {
-            if(IsBetween(input, map.Source))
+            if (IsBetween(input, map.Source))
             {
-                return map.Destination.Start + (input-map.Source.Start);
+                return map.Destination.Start + (input - map.Source.Start);
             }
         }
         return input;
@@ -77,8 +87,8 @@ class Program
         var numbers = ParseNumbers(line).ToList();
         return new Map()
         {
-            Destination = new Range(numbers[0],numbers[2]),
-            Source = new Range(numbers[1],numbers[2]),
+            Destination = new Range(numbers[0], numbers[2]),
+            Source = new Range(numbers[1], numbers[2]),
         };
     }
 
@@ -97,7 +107,7 @@ class Range
     public long End { get; set; }
 }
 
-class Map 
+class Map
 {
     public Range Source { get; set; }
     public Range Destination { get; set; }
