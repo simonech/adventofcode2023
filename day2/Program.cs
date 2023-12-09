@@ -1,15 +1,11 @@
 ﻿using System;
+using System.Net.Mail;
 
 class Program
 {
     static void Main()
     {
         string filePath = "input.txt";
-        int maxBlue = 14;
-        int maxRed = 12;
-        int maxGreen = 13;
-        
-
 
         // Read all lines from the file and store them in an array
         string[] lines = File.ReadAllLines(filePath);
@@ -20,16 +16,21 @@ class Program
         {
             Game game = ParseGame(line);
             Console.WriteLine($"{line} - {game.GameID}");
-            var isGamePossible = true;
+            int minGreen = 0;
+            int minBlue = 0;
+            int minRed = 0;
             foreach (var draw in game.Draws)
             {
-                if(draw.Red>maxRed || draw.Blue >maxBlue || draw.Green>maxGreen)
-                {
-                    isGamePossible = false;
-                    continue;
-                }
+                minGreen = Math.Max(minGreen, draw.Green);
+                minBlue = Math.Max(minBlue, draw.Blue);
+                minRed = Math.Max(minRed, draw.Red);
             }
-            if(isGamePossible) accumulator+=game.GameID;
+            Console.WriteLine($"Min Green {minGreen}");
+            Console.WriteLine($"Min Blue {minBlue}");
+            Console.WriteLine($"Min Red {minRed}");
+            var power = minBlue * minGreen * minRed;
+            Console.WriteLine($"power {power}");
+            accumulator+=power;
         }
         Console.WriteLine($"Total value = {accumulator}");
     }
@@ -38,7 +39,7 @@ class Program
     {
         Game result = new Game();
         var gameIdValue = line.Split(":");
-        result.GameID = Int32.Parse(gameIdValue[0].Replace("Game ",""));
+        result.GameID = Int32.Parse(gameIdValue[0].Replace("Game ", ""));
         var draws = gameIdValue[1].Split(";");
         foreach (var draw in draws)
         {
@@ -53,13 +54,13 @@ class Program
                 switch (colorName)
                 {
                     case "red":
-                        drawObj.Red=colorNum;
+                        drawObj.Red = colorNum;
                         break;
                     case "green":
-                        drawObj.Green=colorNum;
+                        drawObj.Green = colorNum;
                         break;
                     case "blue":
-                        drawObj.Blue=colorNum;
+                        drawObj.Blue = colorNum;
                         break;
                 }
             }
