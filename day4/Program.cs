@@ -45,8 +45,5 @@ class Program
 
         Console.WriteLine($"Total value = {counts.Sum()}");
     }
-
-
-
 }
 
