@@ -16,33 +16,40 @@ class Program
         int accumulator = 0;
         int index = 0;
         List<Part> allNums = new();
-        List<Part> allSymbols = new();
+        List<Part> allGears = new();
         // Print each line
         foreach (string line in lines)
         {
             var nums = ParseString(line, @"\d+", index);
-            var symbols = ParseString(line, @"[^.0-9]", index);
-
-            Console.WriteLine($"{line} - {string.Join(" ", nums)} - {string.Join(" ", symbols)}");
+            var symbols = ParseString(line, @"[*]", index);
             index++;
             allNums.AddRange(nums);
-            allSymbols.AddRange(symbols);
-            //accumulator+=;
+            allGears.AddRange(symbols);
+
+            Console.WriteLine($"{line} - {string.Join(" ", nums)} - {string.Join(" ", symbols)}");
         }
 
-        var sum = (from n in allNums
-                 where allSymbols.Any(s => Adjacent(s,n))
-                  select n.Value).Sum();
+        foreach (var gear in allGears)
+        {
+            var matches = (from n in allNums
+                          where Adjacent(n, gear)
+                          select n.Value).ToList();
 
-        Console.WriteLine($"Total value = {sum}");
+            if (matches.Count == 2)
+            {
+                accumulator += matches[0] * matches[1];
+            }
+        }
+
+        Console.WriteLine($"Total value = {accumulator}");
     }
 
     private static bool Adjacent(Part s, Part n)
     {
         return
-            Math.Abs(s.Row - n.Row) <=1 &&
-            s.Col<=n.Col+n.Text.Length &&
-            n.Col<=s.Col+s.Text.Length;
+            Math.Abs(s.Row - n.Row) <= 1 &&
+            s.Col <= n.Col + n.Text.Length &&
+            n.Col <= s.Col + s.Text.Length;
     }
 
     static IEnumerable<Part> ParseString(string input, string pattern, int row)
@@ -54,12 +61,12 @@ class Program
         foreach (Match match in matches)
         {
 
-                yield return new Part()
-                {
-                    Text = match.Value,
-                    Col = match.Index,
-                    Row = row
-                };
+            yield return new Part()
+            {
+                Text = match.Value,
+                Col = match.Index,
+                Row = row
+            };
 
         }
     }
@@ -77,6 +84,6 @@ class Part
 
     public override string ToString()
     {
-        return Text + " ("+ Row +","+Col+")";
+        return Text + " (" + Row + "," + Col + ")";
     }
 }
